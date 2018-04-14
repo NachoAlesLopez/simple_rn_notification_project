@@ -9,7 +9,8 @@ import {
   Platform,
   StyleSheet,
   Text,
-  View
+  View,
+  DeviceEventEmitter
 } from 'react-native';
 var PushNotification = require('react-native-push-notification');
 
@@ -32,8 +33,20 @@ export default class App extends Component<Props> {
         console.log("Notification received "+notification);
 
         notification.finish();
-      },
+      }
     })
+  }
+
+  configureNotificationHandler = () => {
+    PushNotification.registerNotificationActions(['I\'m making a note here', 'Huge success!']);
+    DeviceEventEmitter.addListener("notificationActionReceived", (action) => {
+      console.log("Received action "+action);
+      const info = JSON.parse(action.dataJSON);
+      if(info.action == 'Huge success!'){
+        alert("It appears so");
+      }
+    })
+    
   }
 
   sendTestingNotification = () => {
@@ -50,6 +63,7 @@ export default class App extends Component<Props> {
   constructor() {
     super();
     this.configureNotifications();
+    this.configureNotificationHandler();
     this.sendTestingNotification();
   }
 
