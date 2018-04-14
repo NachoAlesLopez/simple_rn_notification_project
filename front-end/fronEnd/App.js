@@ -13,8 +13,7 @@ import {
   DeviceEventEmitter
 } from 'react-native';
 var PushNotification = require('react-native-push-notification');
-var BackgroundTask = require('react-native-background-task');
-import queueFactory from 'react-native-queue';
+import BackgroundTimer from 'react-native-background-timer';
 
 PushNotification.configure({
   onRegister: (token) => {
@@ -37,10 +36,8 @@ const instructions = Platform.select({
 
 type Props = {};
 
-BackgroundTask.define(async () => {
-  queue = await queueFactory();
-  console.log("Entra dentro de BackgroundTask");
-
+BackgroundTimer.runBackgroundTimer(() => {
+  console.log("Entra!");
   PushNotification.localNotification({
     id: 0,
     title: "GLaDoS says...",
@@ -50,26 +47,7 @@ BackgroundTask.define(async () => {
     repeatType: 'minute',
     actions: '["I\'m making a note here", "Huge success!" ]',
   });
-
-  queue.addWorker('notificator', async (id, payload) => {
-    console.log("Entra");
-    PushNotification.localNotification({
-      id: 0,
-      title: "GLaDoS says...",
-      message: "This is a triumph",
-      playSound: true,
-      soundName: "default",
-      repeatType: 'minute',
-      actions: '["I\'m making a note here", "Huge success!" ]',
-    });
-  });
-
-  // TODO Reiniciamos el queue?
-  await queue.start(25000);
-
-  console.log("Finaliza la backgroundTask");
-  BackgroundTask.finish();
-})
+}, 5000)
 
 export default class App extends Component<Props> {
   configureNotifications = () => {

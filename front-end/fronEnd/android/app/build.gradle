@@ -137,6 +137,7 @@ android {
 }
 
 dependencies {
+    compile project(':react-native-background-timer')
     compile project(':realm')
     compile project(':react-native-background-task')
     compile project(':react-native-push-notifications')
