@@ -1,0 +1,8 @@
+rootProject.name = 'fronEnd'
+include ':react-native-push-notifications'
+project(':react-native-push-notifications').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-push-notifications/android')
+
+include ':app'
+
+include ':react-native-push-notification'
+project(':react-native-push-notification').projectDir = file('../node_modules/react-native-push-notification/android')
