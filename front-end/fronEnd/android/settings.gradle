@@ -1,4 +1,8 @@
 rootProject.name = 'fronEnd'
+include ':realm'
+project(':realm').projectDir = new File(rootProject.projectDir, '../node_modules/realm/android')
+include ':react-native-background-task'
+project(':react-native-background-task').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-background-task/android')
 include ':react-native-push-notifications'
 project(':react-native-push-notifications').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-push-notifications/android')
 

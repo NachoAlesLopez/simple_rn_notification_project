@@ -13,6 +13,20 @@ import {
   DeviceEventEmitter
 } from 'react-native';
 var PushNotification = require('react-native-push-notification');
+var BackgroundTask = require('react-native-background-task');
+import queueFactory from 'react-native-queue';
+
+PushNotification.configure({
+  onRegister: (token) => {
+    console.log("Registered with token " + token);
+  },
+
+  onNotification: (notification) => {
+    console.log("Notification received " + notification);
+
+    notification.finish();
+  }
+});
 
 const instructions = Platform.select({
   ios: 'Press Cmd+R to reload,\n' +
@@ -22,15 +36,50 @@ const instructions = Platform.select({
 });
 
 type Props = {};
+
+BackgroundTask.define(async () => {
+  queue = await queueFactory();
+  console.log("Entra dentro de BackgroundTask");
+
+  PushNotification.localNotification({
+    id: 0,
+    title: "GLaDoS says...",
+    message: "This is a triumph",
+    playSound: true,
+    soundName: "default",
+    repeatType: 'minute',
+    actions: '["I\'m making a note here", "Huge success!" ]',
+  });
+
+  queue.addWorker('notificator', async (id, payload) => {
+    console.log("Entra");
+    PushNotification.localNotification({
+      id: 0,
+      title: "GLaDoS says...",
+      message: "This is a triumph",
+      playSound: true,
+      soundName: "default",
+      repeatType: 'minute',
+      actions: '["I\'m making a note here", "Huge success!" ]',
+    });
+  });
+
+  // TODO Reiniciamos el queue?
+  await queue.start(25000);
+
+  console.log("Finaliza la backgroundTask");
+  BackgroundTask.finish();
+})
+
 export default class App extends Component<Props> {
   configureNotifications = () => {
     PushNotification.configure({
       onRegister: (token) => {
-        console.log("Registered with token "+token);
+        console.log("Registered with token " + token);
       },
 
       onNotification: (notification) => {
-        console.log("Notification received "+notification);
+        console.log("Notification received " + notification);
 
         notification.finish();
       }
@@ -40,13 +89,13 @@ export default class App extends Component<Props> {
   configureNotificationHandler = () => {
     PushNotification.registerNotificationActions(['I\'m making a note here', 'Huge success!']);
     DeviceEventEmitter.addListener("notificationActionReceived", (action) => {
-      console.log("Received action "+action);
+      console.log("Received action " + action);
       const info = JSON.parse(action.dataJSON);
-      if(info.action == 'Huge success!'){
+      if (info.action == 'Huge success!') {
         alert("It appears so");
       }
     })
-    
+
   }
 
   sendTestingNotification = () => {
@@ -60,18 +109,20 @@ export default class App extends Component<Props> {
       actions: '["I\'m making a note here", "Huge success!" ]',
     });
   }
+
   constructor() {
     super();
-    this.configureNotifications();
     this.configureNotificationHandler();
-    this.sendTestingNotification();
   }
 
   render() {
-    this.sendTestingNotification();
     return (
       <Text>Prueba de notificaciones</Text>
     );
+  }
+
+  componentDidMount() {
+    BackgroundTask.schedule();
   }
 
 }
